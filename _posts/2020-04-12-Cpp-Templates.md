@@ -23,9 +23,13 @@ int a = add(1, 2);
 
 Let’s break it down bit by bit:
 `template<` signifies that this function (or class/struct, more on that later), is a template.
+
 `typename T` says that we are declaring a type called `T`, which will be specified by the user.
+
 `T add(T a, T, b){` says that this function has a return type of `T`, and takes two parameters also of type `T`.
+
 The type of `T` is automatically inferred when we call it, since we use it as parameters.
+
 
 The key difference between C++ templates and something like Java’s generics, is that all the magic of templates happens at compile-time, and there is no type-erasure. The compiler basically stamps out a copy of the function with `T` replaced with the actual type. This happens once per unique signature. So if we call our add function like this:
 ```cpp
@@ -80,7 +84,7 @@ DiffType dist(Iter begin, Iter end){
     return count;
 }
 ```
-The `typename DiffType = std::iterator_traits<Iter>::difference_type` just aliases the type so we don’t have to type a long type name twice. See @@LINK here for more on the actual `iterator_traits` function.
+The `typename DiffType = std::iterator_traits<Iter>::difference_type` just aliases the type so we don’t have to type a long type name twice. See [here](https://en.cppreference.com/w/cpp/iterator/iterator_traits) for more on the actual `iterator_traits` function.
 
 Note that runtime is O(N). This works, but in some cases, we can do better. Iterators from containers such `std::vector` can have their distance computed in constant time, since they are really just pointers. These iterators support the subtraction operator. So for vectors, we want code that looks like this:
 ```cpp
@@ -93,7 +97,9 @@ We can leverage templates to do this. First, we have to discuss `decltype, declv
 
 ## decltype & declval
 `decltype` Basically extracts the type of the given expression. For example, `decltype(5)` will yield the type `int`.
+
 `declval` takes a type as a template parameter, and produces a non-instantiable version of that object. This is generally used to create an expression from template parameters, and then extract that type. For example, if we want to get the type of adding two `T`s together, we would write:
+
 ```cpp
 decltype(std::declval<T&>() + std::declval<T&>())
 ```
@@ -114,6 +120,7 @@ template <typename T, typename = void>
 struct can_subtract : std::false_type{};
 ```
 The `typename = void` is because we will need that parameter later, but don’t need to do anything with it here.
+
 `: std::false_type` makes this class inherit from `std::false_type`, which provides a public boolean named `value`, which is `false`.
 
 Now, we add in our specialization. This is where we test if we can subtract the types.
