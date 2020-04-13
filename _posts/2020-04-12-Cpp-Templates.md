@@ -104,15 +104,17 @@ We can leverage templates to do this. First, we have to discuss `decltype, declv
 decltype(std::declval<T&>() + std::declval<T&>())
 ```
 ## SFINAE, std::enable_if, & void_t
-SFINAE stands for Substitution Failure is Not An Error. This rule states that a template that is ill-formed does not generate an error. Instead, the next viable overload is attempted. @@LINK
+SFINAE stands for Substitution Failure is Not An Error. This rule states that a template that is ill-formed does not generate an error. Instead, the next viable overload is attempted. See [here](https://en.cppreference.com/w/cpp/language/sfinae) for more details.
 
-To leverage this functionality, the standard library provides the function `enable_if`. @@LINK. This function removes a template from the set of possible matches if the first template parameter is false.
+To leverage this functionality, the standard library provides the function `enable_if`. ([Click here for docs](https://en.cppreference.com/w/cpp/types/enable_if)) 
 
-`std::void_t` is a utility function that is used to check if a sequence of types is well formed. @@LINK
+This function removes a template from the set of possible matches if the first template parameter is false.
+
+`std::void_t` is a utility function that is used to check if a sequence of types is well formed. [Docs](https://en.cppreference.com/w/cpp/types/void_t)
 
 
 ## Part 1
-We need to begin by creating a way to test if we can subtract two objects. To do this, we will write some code similar to the ones found in `type_traits` @@LINK.
+We need to begin by creating a way to test if we can subtract two objects. To do this, we will write some code similar to the ones found in [`type_traits`](https://en.cppreference.com/w/cpp/header/type_traits)
 
 First, we will provide a base template. This template has the lowest priority, so if there is another template, it will take priority (if valid).
 ```cpp
@@ -144,7 +146,7 @@ diff_type dist(T begin, T end){
     return count;
 }
 ```
-The `std::enable_if` line checks if `T` can not be subtracted. If it can’t be, then it evaluates to type `int`. The `= 0` is needed because of a quirk in how redeclarations are recognized @@LINK. Conversely, if `T` CAN be subtracted from itself, the `enable_if` will trigger SFINAE, and this template will be discarded.
+The `std::enable_if` line checks if `T` can not be subtracted. If it can’t be, then it evaluates to type `int`. The `= 0` is needed because of a quirk in how redeclarations are recognized (see the `enable_if` docs for more details). Conversely, if `T` CAN be subtracted from itself, the `enable_if` will trigger SFINAE, and this template will be discarded.
 
 The special version looks like this:
 ```
