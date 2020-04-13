@@ -206,4 +206,8 @@ Note: You will probably need a newer C++ compiler for this.
 
 ## Conclusion
 
-
+While a very short example, hopefully this blog post has provided some ideas on how one can leverage templates to do large amounts of work at compile time. It should be noted that this post barely scratches the surface of what is possible. Readers interested in learning more should consult the following sources, which I used while writing this blog post.
+* <https://en.cppreference.com/>
+* <https://www.fluentcpp.com/2017/06/02/write-template-metaprogramming-expressively/>
+* <https://www.youtube.com/watch?v=Am2is2QCvxY>
+* <https://www.youtube.com/watch?v=a0FliKwcwXE>
