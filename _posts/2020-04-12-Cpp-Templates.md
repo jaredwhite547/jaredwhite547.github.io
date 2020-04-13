@@ -149,7 +149,7 @@ diff_type dist(T begin, T end){
 The `std::enable_if` line checks if `T` can not be subtracted. If it can’t be, then it evaluates to type `int`. The `= 0` is needed because of a quirk in how redeclarations are recognized (see the `enable_if` docs for more details). Conversely, if `T` CAN be subtracted from itself, the `enable_if` will trigger SFINAE, and this template will be discarded.
 
 The special version looks like this:
-```
+```cpp
 template<typename T,
         typename diff_type = std::iterator_traits<T>::difference_type,
         std::enable_if_t<can_subtract<T>::value, int> = 0>
@@ -161,7 +161,7 @@ diff_type dist(T begin, T end){
 The only difference (aside from the function body), is that the `enable_if` fires if we CAN subtract it, and triggers SFINAE if we cannot.
 
 The complete code looks like this:
-```
+```cpp
 #include <type_traits>
 #include <iostream>
 #include <vector>
