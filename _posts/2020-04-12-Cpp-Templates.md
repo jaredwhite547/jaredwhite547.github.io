@@ -7,15 +7,16 @@ title: C++ Templates & Metaprogramming
 This blog post is intended to serve as a brief introduction to templates in C++. It will show some and explain some basic examples, and provide some reasoning and motivation. It’ll then explain some more advanced concepts, and showcase them.
 ## What are templates?
 Templates are C++’s version of generics. For example, if we want to write a function that can add two parameters together, we could write it like this:
-```
+```cpp
 template<typename T>
 T add(T a, T b){
     return a+b;
 }
+```
 
 
 We can call it as we would any normal function. For example:
-```
+```cpp
 int a = add(1, 2);
 ```
 
@@ -26,7 +27,7 @@ Let’s break it down bit by bit:
 The type of T is automatically inferred when we call it, since we use it as parameters.
 
 The key difference between C++ templates and something like Java’s generics, is that all the magic of templates happens at compile-time, and there is no type-erasure. The compiler basically stamps out a copy of the function with “T” replaced with the actual type. This happens once per unique signature. So if we call our add function like this:
-```
+```cpp
 `int a = add(1, 2);`
 int b = add(2, 1);
 float c = add(3.0, 4.0);
@@ -42,7 +43,7 @@ float add(float a, float b){
 }
 ```
 Note that templates can also be classes/structs:
-```C++
+```cpp
 template <typename T, typename U>
 struct pair{
     T first;
@@ -66,7 +67,7 @@ There are numerous benefits to this over run-time, type-erased generics:
 
 ## Motivation
 Let’s say we have a pair of iterators, and want to find out the distance between them. Here’s how you would write it so that it worked with every iterator from every container:
-```c++
+```cpp
 template <typename Iter, typename DiffType = std::iterator_traits<Iter>::difference_type>
 DiffType dist(Iter begin, Iter end){
     DiffType count(0);
@@ -78,7 +79,7 @@ DiffType dist(Iter begin, Iter end){
 The typename DiffType = std::iterator_traits<Iter>::difference_type just aliases the type so we don’t have to type a long type name twice. See @@LINK here for more on the actual iterator_traits function.
 
 Note that runtime is O(N). This works, but in some cases, we can do better. Iterators from containers such std::vector can have their distance computed in constant time, since they are really just pointers. These iterators support the subtraction operator. So for vectors, we want code that looks like this:
-```Cpp
+```cpp
 template <typename Iter, typename DiffType = std::iterator_traits<Iter>::difference_type>
 DiffType dist(Iter begin, Iter end){
     return end - begin;
@@ -89,7 +90,7 @@ We can leverage templates to do this. First, we have to discuss decltype, declva
 ## decltype & declval
 decltype Basically extracts the type of the given expression. For example, decltype(5) will yield the type int.
 declval takes a type as a template parameter, and produces a non-instantiable version of that object. This is generally used to create an expression from template parameters, and then extract that type. For example, if we want to get the type of adding two Ts together, we would write:
-```
+```cpp
 decltype(std::declval<T&>() + std::declval<T&>())
 ```
 ## SFINAE, std::enable_if, & void_t
@@ -104,7 +105,7 @@ std::void_t is a utility function that is used to check if a sequence of types i
 We need to begin by creating a way to test if we can subtract two objects. To do this, we will write some code similar to the ones found in type_traits @@LINK.
 
 First, we will provide a base template. This template has the lowest priority, so if there is another template, it will take priority (if valid).
-```
+```cpp
 template <typename T, typename = void>
 struct can_subtract : std::false_type{};
 ```
@@ -112,7 +113,7 @@ The “typename = void” is because we will need that parameter later, but don�
 “: std::false_type” makes this class inherit from std::false_type, which provides a public boolean named value, which is false.
 
 Now, we add in our specialization. This is where we test if we can subtract the types.
-```
+```cpp
 template <typename T>
 struct can_subtract<T, std::void_t<decltype(std::declval<T&>() - std::declval<T&>())>> : std::true_type{};
 ```
@@ -120,7 +121,7 @@ This syntax is a specialization. We take the T as normal, but instead of having 
 
 We now have a way to test if our objects support subtraction. With this, we can build our distance function.
 The non-optimized, normal version will look like this:
-```
+```cpp
 template <typename T,
         typename diff_type = std::iterator_traits<T>::difference_type,
         std::enable_if_t<!can_subtract<T>::value, int> = 0>
